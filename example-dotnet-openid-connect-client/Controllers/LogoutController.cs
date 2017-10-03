@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Configuration;
+﻿using System.Web.Mvc;
 
 namespace exampledotnetopenidconnectclient.Controllers
 {
     public class LogoutController : Controller
     {
-        private string logout_endpoint = ConfigurationManager.AppSettings["logout_endpoint"];
+        private static string logout_endpoint = App_Start.AppConfig.Instance.GetLogoutEndpoint();
 
         public ActionResult Index()
         {

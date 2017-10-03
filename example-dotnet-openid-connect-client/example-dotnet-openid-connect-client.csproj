@@ -105,9 +105,9 @@
     <Compile Include="Controllers\CallbackController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\LogoutController.cs" />
-    <Compile Include="Helpers\Client.cs" />
     <Compile Include="Helpers\AsyncHelpers.cs" />
     <Compile Include="App_Start\AppConfig.cs" />
+    <Compile Include="Helpers\Client.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Web.config" />

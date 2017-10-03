@@ -1,0 +1,114 @@
+﻿<div class="navbar">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <a href="/"><img src="/content/img/logo.png"/></a>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>
+<div class="container-fluid">
+	<!-- todo maybe change error to contet from session -->
+	@if(Session["error"] != null) {
+   
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <p class="text-danger"> @Session["error"] </p>
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+
+	    Session["error"] = null;
+    }
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <h2 class="welcome">Welcome <span id="sessionname"></span>!</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+			@if(Session.Count == 0) {
+            
+                <p class="text-default">This is a demo application to demonstrate the use for OAuth2 and OpenID Connect. </p>
+
+                <p class="text-default">Pressing Sign In will redirect you to @ViewData["server_name"] and authorize
+                    the application to access your profile info. The data will only be used to
+                    demonstrate
+                    the possibilities of the OpenID Connect
+                    protocol and will not be stored. Be sure to revoke access when you are satisfied.</p>
+                <div class="center-block">
+                    <a class="btn btn-primary center-block" style="display: block; width: 200px" role="button" href="/login">Sign In</a>
+                </div>
+            } else {
+
+                <ul class="list-group">
+				    @if(Session["api_response_status_code"] != null) {
+                    
+                        <li class="list-group-item">
+                            API Response
+                            <span class="label pull-right" id="api-response-status-code">
+                               Session["api_response_status_code"]
+                            </span>
+                        </li>
+                        <div>
+                            <pre class="json hidden" id="api-response-data">@Session["api_response_data"]</pre>
+                        </div>
+				        Session["api_response_status_code"] = null;
+                    }
+				
+                    @if(Session["id_token"] != null) {
+
+                        <li class="list-group-item">ID Token</li>
+                        <div>
+                            <pre class="json hidden">@Session["id_token_json0"]</pre>
+                            <pre class="json hidden" id="id-token-payload">@Session["id_token_json1"]</pre>
+                        </div>
+                    }
+
+				    @if(Session["access_token"] != null) {
+                        <li class="list-group-item">Access Token
+                             @if(Session["refresh_token"] != null) {
+                                <a href="@Url.Action("Refresh", "")" class="btn btn-xs btn-info pull-right" id="refresh">refresh</a>
+                             }
+                        </li>
+                        <div>
+					        @if(Session["access_token_json"] != null) {
+                                <pre class="json hidden">@Session["access_token_json"] [0]</pre>
+                                <pre class="json hidden">@Session["access_token_json"] [1]</pre>
+                            } else {
+                                <pre>@Session["access_token"]</pre>
+                            }
+                        </div>
+                    }
+
+				    @if(Session["refresh_token"] != null) {
+                        <div>
+                            <li class="list-group-item">Refresh Token
+                                <a href="@Url.Action("Revoke", "")" class="btn btn-xs btn-danger pull-right">revoke</a>
+                            </li>
+                            <pre>@Session["refresh_token"]</pre>
+                        </div>
+                    }
+                </ul>
+            }
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+			@if(Session.Count != 0) {
+                <div class="btn-group btn-group-justified mb" role="group">
+                    <a href="@Url.Action("CallApi", "")" class="btn btn-default" type="button">Request data from api</a>
+                </div>
+                <div class="btn-group btn-group-justified" role="group">
+                    <a class="btn btn-default" type="button" href="/logout">Log out</a>
+                </div>
+            }
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>

@@ -109,7 +109,7 @@ namespace exampledotnetopenidconnectclient.Helpers
             {
                 var responseContent = response.Content;
 
-                return responseContent.ReadAsStringAsync().Result; ;
+                return responseContent.ReadAsStringAsync().Result;
             }
 
             return null;

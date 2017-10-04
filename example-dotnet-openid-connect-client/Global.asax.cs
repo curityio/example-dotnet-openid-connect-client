@@ -12,7 +12,6 @@ namespace exampledotnetopenidconnectclient
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-            GlobalConfiguration.Configure(WebApiConfig.Register);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
     }

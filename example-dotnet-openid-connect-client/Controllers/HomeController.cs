@@ -19,6 +19,11 @@ namespace exampledotnetopenidconnectclient.Controllers
         {
 
             ViewData["server_name"] = iss;
+            if (Session["error"] != null)
+            {
+                ViewData["error"] = Session["error"];
+                Session["error"] = null;
+            }
 
             return View();
 
@@ -37,6 +42,7 @@ namespace exampledotnetopenidconnectclient.Controllers
                 Session["access_token"] = jsonObj.GetValue("access_token");
                 Session["refresh_token"] = jsonObj.GetValue("refresh_token");
             }
+
             return Redirect("/");
         }
 
@@ -50,8 +56,8 @@ namespace exampledotnetopenidconnectclient.Controllers
             {
                 Session["error"] = "Could not revoke Access Token";
             }
-            return Redirect("/");
 
+            return Redirect("/");
         }
 
         public ActionResult CallApi()
@@ -69,7 +75,6 @@ namespace exampledotnetopenidconnectclient.Controllers
             Session["api_response_data"] = responseString;
 
             return Redirect("/");
-
         }
     }
 }

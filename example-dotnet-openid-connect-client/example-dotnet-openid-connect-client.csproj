@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>exampledotnetopenidconnectclient</RootNamespace>
     <AssemblyName>example-dotnet-openid-connect-client</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -100,7 +100,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\CallbackController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
@@ -108,6 +107,7 @@
     <Compile Include="Helpers\AsyncHelpers.cs" />
     <Compile Include="App_Start\AppConfig.cs" />
     <Compile Include="Helpers\Client.cs" />
+    <Compile Include="Helpers\JwtValidationException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Web.config" />

@@ -4,8 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
-using exampledotnetopenidconnectclient.Helpers;
 using Newtonsoft.Json.Linq;
 using static System.Convert;
 
@@ -27,8 +27,14 @@ namespace exampledotnetopenidconnectclient.Controllers
 
             if (!String.IsNullOrEmpty(responseString))
             {
-                SaveDataToSession(responseString);
-
+                try
+                {
+                    SaveDataToSession(responseString);
+                }
+                catch (JwtValidationException e)
+                {
+                    Session["error"] = e.Message;
+                }
             }
 
             return Redirect("/");
@@ -48,13 +54,6 @@ namespace exampledotnetopenidconnectclient.Controllers
                 Session["id_token_json0"] = id_token_obj.GetValue("decoded_header").ToString();
                 Session["id_token_json1"] = id_token_obj.GetValue("decoded_payload").ToString();
             }
-
-            Session["token_type"] = jsonObj.GetValue("token_type");
-
-            TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-            int secondsSinceEpoch = (int)t.TotalSeconds;
-            Session["access_token_expires"] = Int32.Parse(jsonObj.GetValue("expires_in").ToString()) + secondsSinceEpoch;
-
         }
 
 
@@ -67,8 +66,7 @@ namespace exampledotnetopenidconnectclient.Controllers
         private byte[] getPaddedBase64String(string base64Url)
         {
             string padded = base64Url.Length % 4 == 0 ? base64Url : base64Url + "====".Substring(base64Url.Length % 4);
-            string base64 = padded.Replace("_", "/")
-                                  .Replace("-", "+");
+            string base64 = padded.Replace("_", "/").Replace("-", "+");
             return FromBase64String(base64);
         }
 
@@ -77,54 +75,80 @@ namespace exampledotnetopenidconnectclient.Controllers
             string[] jwtParts = jwt.Split('.');
 
             String decodedHeader = SafeDecodeBase64(jwtParts[0]);
+            String decodedPayload = SafeDecodeBase64(jwtParts[1]);
             id_token_obj = new JObject
             {
                 {"decoded_header", decodedHeader },
-                {"decoded_payload", SafeDecodeBase64(jwtParts[1])}
+                {"decoded_payload", decodedPayload }
             };
 
             String keyId = JObject.Parse(decodedHeader).GetValue("kid").ToString();
+            JToken keyFound = (JToken)System.Web.HttpContext.Current.Application[keyId];
 
+            if (keyFound == null)
+            {
+                keyFound = FetchKeys(keyId);
+                if (keyFound == null)
+                {
+                    throw new JwtValidationException("Key not found in JWKS endpoint or Application State");
+                }
+            }
+
+            if (!JObject.Parse(decodedPayload).GetValue("iss").ToString().Equals(issuer)){
+                throw new JwtValidationException("Issuer not validated");
+            }
+
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            rsa.ImportParameters(
+              new RSAParameters()
+              {
+                  Modulus = getPaddedBase64String(keyFound["n"].ToString()),
+                  Exponent = getPaddedBase64String(keyFound["e"].ToString())
+              });
+
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(jwtParts[0] + '.' + jwtParts[1]));
+
+            RSAPKCS1SignatureDeformatter rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
+            rsaDeformatter.SetHashAlgorithm("SHA256");
+            if (rsaDeformatter.VerifySignature(hash, getPaddedBase64String(jwtParts[2])))
+            {
+                return true; //Jwt Validated
+            }
+            else
+            {
+                throw new JwtValidationException("Could not validate signature of JWT");
+
+            }
+        }
+
+        public JToken FetchKeys(String keyId)
+        {
             var jwksclient = new HttpClient();
-
             jwksclient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
             var response = jwksclient.GetAsync(jwks_uri).Result;
+
             if (response.IsSuccessStatusCode)
             {
-                // by calling .Result you are performing a synchronous call
                 var responseContent = response.Content;
-
                 string responseString = responseContent.ReadAsStringAsync().Result;
 
-                JToken keyFound = null;
                 foreach (JToken key in JObject.Parse(responseString).GetValue("keys").ToArray())
                 {
                     if (key["kid"].ToString().Equals(keyId))
                     {
-                        keyFound = key;
+                        System.Web.HttpContext.Current.Application.Lock();
+                        System.Web.HttpContext.Current.Application[keyId] = key;
+                        System.Web.HttpContext.Current.Application.UnLock();
+
+                        return key;
                     }
                 }
-                if (keyFound != null)
-                {
-                    RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-                    rsa.ImportParameters(
-                      new RSAParameters()
-                      {
-                          Modulus = getPaddedBase64String(keyFound["n"].ToString()),
-                          Exponent = getPaddedBase64String(keyFound["e"].ToString())
-                      });
 
-                    SHA256 sha256 = SHA256.Create();
-                    byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(jwtParts[0] + '.' + jwtParts[1]));
-
-                    RSAPKCS1SignatureDeformatter rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                    rsaDeformatter.SetHashAlgorithm("SHA256");
-                    if (rsaDeformatter.VerifySignature(hash, getPaddedBase64String(jwtParts[2])))
-                        return true;
-                }
+                throw new JwtValidationException("Key not found in JWKS endpoint");
             }
-            return false;
+
+            throw new JwtValidationException("Could not contact JWKS endpoint");
         }
     }
 }

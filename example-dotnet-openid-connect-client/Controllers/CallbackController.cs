@@ -38,18 +38,18 @@ namespace exampledotnetopenidconnectclient.Controllers
 
         public ActionResult Index()
         {
-            string responseString = _client.GetToken(Request.QueryString["code"]);
-
-            if (!String.IsNullOrEmpty(responseString))
+            try
             {
-                try
-                {
-                    SaveDataToSession(responseString);
-                }
-                catch (JwtValidationException e)
-                {
-                    Session["error"] = e.Message;
-                }
+                string responseString = _client.GetToken(Request.QueryString["code"]);
+                SaveDataToSession(responseString);
+            }
+            catch (JwtValidationException e)
+            {
+                Session["error"] = e.Message;
+            }
+            catch (OAuthClientException e)
+            {
+                Session["error"] = e.Message;
             }
 
             return Redirect("/");
@@ -109,7 +109,8 @@ namespace exampledotnetopenidconnectclient.Controllers
                 }
             }
 
-            if (!JObject.Parse(decodedPayload).GetValue("iss").ToString().Equals(issuer)){
+            if (!JObject.Parse(decodedPayload).GetValue("iss").ToString().Equals(issuer))
+            {
                 throw new JwtValidationException("Issuer not validated");
             }
 

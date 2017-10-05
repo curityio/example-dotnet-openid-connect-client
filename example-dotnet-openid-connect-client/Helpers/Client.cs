@@ -48,7 +48,7 @@ namespace exampledotnetopenidconnectclient.Helpers
             scope = _config.GetScope();
         }
 
-        public bool Revoke(String refresh_token)
+        public void Revoke(String refresh_token)
         {
             var values = new Dictionary<string, string>
             {
@@ -66,10 +66,10 @@ namespace exampledotnetopenidconnectclient.Helpers
                 var responseContent = response.Content;
                 string responseString = responseContent.ReadAsStringAsync().Result;
 
-                return true;
+                return;
             }
 
-            return false;
+            throw new OAuthClientException("Could not revoke the refresh token");
         }
 
         public String Refresh(String refresh_token)
@@ -93,7 +93,7 @@ namespace exampledotnetopenidconnectclient.Helpers
                 return responseContent.ReadAsStringAsync().Result;
             }
 
-            return null;
+            throw new OAuthClientException("Could not refresh the tokens");
         }
 
         public String GetAuthnReqUrl()
@@ -126,7 +126,7 @@ namespace exampledotnetopenidconnectclient.Helpers
                 return responseContent.ReadAsStringAsync().Result;
             }
 
-            return null;
+            throw new OAuthClientException("Token request failed with status code: " + response.StatusCode);
         }
 
         public static Client Instance

@@ -104,6 +104,7 @@
     <Compile Include="App_Start\AppConfig.cs" />
     <Compile Include="Helpers\Client.cs" />
     <Compile Include="Helpers\JwtValidationException.cs" />
+    <Compile Include="Helpers\OAuthClientException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Web.config" />

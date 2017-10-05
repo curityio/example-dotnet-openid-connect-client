@@ -47,31 +47,33 @@ namespace exampledotnetopenidconnectclient.Controllers
 
         public ActionResult Refresh()
         {
-            String responseString = _client.Refresh(Session["refresh_token"].ToString());
-            if (String.IsNullOrEmpty(responseString))
+            try
             {
-                Session["error"] = "Could not refresh Access Token";
+               String responseString = _client.Refresh(Session["refresh_token"].ToString());
+				JObject jsonObj = JObject.Parse(responseString);
+				Session["access_token"] = jsonObj.GetValue("access_token");
+				Session["refresh_token"] = jsonObj.GetValue("refresh_token");
             }
-            else
-            {
-                JObject jsonObj = JObject.Parse(responseString);
-                Session["access_token"] = jsonObj.GetValue("access_token");
-                Session["refresh_token"] = jsonObj.GetValue("refresh_token");
-            }
+			catch (OAuthClientException e)
+			{
+				Session["error"] = e.Message;
+			}
 
             return Redirect("/");
         }
 
         public ActionResult Revoke()
         {
-            if (_client.Revoke(Session["refresh_token"].ToString()))
+            try
             {
+                _client.Revoke(Session["refresh_token"].ToString());
                 Session["refresh_token"] = null;
             }
-            else
+            catch (OAuthClientException e)
             {
-                Session["error"] = "Could not revoke Access Token";
+                Session["error"] = e.Message;
             }
+            
 
             return Redirect("/");
         }

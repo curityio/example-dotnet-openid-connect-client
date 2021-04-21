@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Net;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
@@ -25,6 +26,8 @@ namespace exampledotnetopenidconnectclient.App_Start
 
         private AppConfig()
         {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             client_id = ConfigurationManager.AppSettings["client_id"];
             client_secret = ConfigurationManager.AppSettings["client_secret"];
             redirect_uri = ConfigurationManager.AppSettings["redirect_uri"];
@@ -42,7 +45,6 @@ namespace exampledotnetopenidconnectclient.App_Start
             {
                 var discoveryClient = new HttpClient();
 
-
                 var response = discoveryClient.GetAsync(issuer + "/.well-known/openid-configuration").Result;
                 if (response.IsSuccessStatusCode)
                 {
@@ -52,11 +54,14 @@ namespace exampledotnetopenidconnectclient.App_Start
                     authorization_endpoint = responseJson["authorization_endpoint"].ToString();
                     token_endpoint = responseJson["token_endpoint"].ToString();
                     revocation_endpoint = responseJson["revocation_endpoint"].ToString();
+                    logout_endpoint = responseJson["end_session_endpoint"].ToString();
                     jwks_uri = responseJson["jwks_uri"].ToString();
 
                 }
             }
         }
+
+
 
         public String GetLogoutEndpoint()
         {

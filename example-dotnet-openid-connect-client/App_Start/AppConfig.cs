@@ -54,6 +54,7 @@ namespace exampledotnetopenidconnectclient.App_Start
                     authorization_endpoint = responseJson["authorization_endpoint"].ToString();
                     token_endpoint = responseJson["token_endpoint"].ToString();
                     revocation_endpoint = responseJson["revocation_endpoint"].ToString();
+                    logout_endpoint = responseJson["end_session_endpoint"].ToString();
                     jwks_uri = responseJson["jwks_uri"].ToString();
 
                 }

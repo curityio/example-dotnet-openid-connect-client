@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
+using System.Web;
 using System.Web.Mvc;
 
 namespace exampledotnetopenidconnectclient.Controllers
 {
     public class LogoutController : Controller
     {
+        private static string client_id = App_Start.AppConfig.Instance.GetClientId();
         private static string logout_endpoint = App_Start.AppConfig.Instance.GetLogoutEndpoint();
+        private static string base_url = App_Start.AppConfig.Instance.GetBaseUrl();
 
         public ActionResult Index()
         {
             Session.Abandon();
 
-            return Redirect(logout_endpoint);
+            string logout_request = $"{logout_endpoint}?client_id={client_id}&post_logout_redirect_uri={HttpUtility.UrlEncode(base_url)}";
+            return Redirect(logout_request);
         }
     }
 }

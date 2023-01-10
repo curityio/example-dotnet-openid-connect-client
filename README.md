@@ -4,7 +4,7 @@
 [![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
 
 This is a .NET framework demo application to explain how the OpenID Connect code flow is implemented.\
-See the tutorial on the [Curity Web Site](https://curity.io/resources/learn/dotnet-openid-connect-client/) for further details.
+See the tutorial on the [Curity Web Site](https://curity.io/resources/learn/dotnetframework-openid-connect-client/) for further details.
 
 
 ## web.config
